@@ -5,6 +5,7 @@ import { IncidentsView } from '@/components/views/IncidentsView';
 import { QueryView } from '@/components/views/QueryView';
 import { TimelineView } from '@/components/views/TimelineView';
 import { KnowledgeBaseView } from '@/components/views/KnowledgeBaseView';
+import { ReportsView } from '@/components/views/ReportsView';
 import { PlaceholderView } from '@/components/views/PlaceholderView';
 
 const Index = () => {
@@ -23,7 +24,7 @@ const Index = () => {
       case 'knowledge':
         return <KnowledgeBaseView />;
       case 'reports':
-        return <PlaceholderView title="Automated Reports" description="Generate daily, weekly, and monthly SOC reports with trends, KPIs, and actionable insights." />;
+        return <ReportsView />;
       case 'settings':
         return <PlaceholderView title="Settings" description="Configure SIEM integrations, AI models, escalation rules, and user roles." />;
       default:
