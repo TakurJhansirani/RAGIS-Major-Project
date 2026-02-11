@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Zap,
   Brain,
+  GitBranch,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,7 @@ const navItems = [
   { id: 'timeline', label: 'Timeline', icon: Clock },
   { id: 'knowledge', label: 'Knowledge Base', icon: Database },
   { id: 'reports', label: 'Reports', icon: FileText },
+  { id: 'analysis', label: 'Root Cause', icon: GitBranch },
 ];
 
 const bottomItems = [
