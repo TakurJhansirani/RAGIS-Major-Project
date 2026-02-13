@@ -1,6 +1,6 @@
-import { Bell, Search, Menu, Shield, Activity } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Search, Menu, Shield, Activity } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { NotificationPanel } from '@/components/NotificationPanel';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -36,12 +36,7 @@ export const TopBar = ({ onToggleSidebar }: TopBarProps) => {
         <ThemeToggle />
 
         {/* Notifications */}
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-            3
-          </span>
-        </button>
+        <NotificationPanel />
 
         {/* User */}
         <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5">
