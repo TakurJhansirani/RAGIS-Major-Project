@@ -20,7 +20,7 @@ export const DashboardLayout = ({ children, activeView, onViewChange }: Dashboar
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <TopBar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onNavigate={onViewChange} />
         <main className="flex-1 overflow-auto p-6">
           {children}
         </main>

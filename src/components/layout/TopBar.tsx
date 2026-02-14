@@ -1,12 +1,14 @@
-import { Search, Menu, Shield, Activity } from 'lucide-react';
+import { Menu, Shield, Activity } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { NotificationPanel } from '@/components/NotificationPanel';
+import { GlobalSearch } from '@/components/GlobalSearch';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
+  onNavigate: (view: string) => void;
 }
 
-export const TopBar = ({ onToggleSidebar }: TopBarProps) => {
+export const TopBar = ({ onToggleSidebar, onNavigate }: TopBarProps) => {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card/50 px-6">
       <div className="flex items-center gap-4">
@@ -22,15 +24,8 @@ export const TopBar = ({ onToggleSidebar }: TopBarProps) => {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search incidents, IPs, assets..."
-            className="h-9 w-72 rounded-lg border border-border bg-background pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors"
-          />
-        </div>
+        {/* Global Search */}
+        <GlobalSearch onNavigate={onNavigate} />
 
         {/* Theme Toggle */}
         <ThemeToggle />
