@@ -76,25 +76,25 @@ export const ReportsView = () => {
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-4 sm:space-y-5 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
             Automated Reports
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             AI-generated SOC reports with KPI trends, incident analytics, and actionable insights.
           </p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 self-start">
           {periods.map((p) => (
             <button
               key={p.id}
               onClick={() => setPeriod(p.id)}
               className={cn(
-                'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                'flex items-center gap-1.5 rounded-md px-3 py-2 sm:py-1.5 text-xs font-medium transition-all',
                 period === p.id
                   ? 'bg-primary/15 text-primary border border-primary/30'
                   : 'text-muted-foreground hover:text-foreground border border-transparent'

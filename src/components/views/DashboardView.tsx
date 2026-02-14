@@ -12,9 +12,9 @@ export const DashboardView = () => {
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <MetricCard
           title="Total Incidents"
           value={dashboardMetrics.totalIncidents.toLocaleString()}
@@ -53,33 +53,33 @@ export const DashboardView = () => {
       </div>
 
       {/* Secondary Metrics */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-          <CheckCircle className="h-5 w-5 text-success" />
-          <div>
-            <p className="text-lg font-bold text-foreground">{dashboardMetrics.resolvedToday}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Resolved Today</p>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 sm:p-4">
+          <CheckCircle className="h-5 w-5 shrink-0 text-success" />
+          <div className="min-w-0">
+            <p className="text-base sm:text-lg font-bold text-foreground">{dashboardMetrics.resolvedToday}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">Resolved Today</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-          <ArrowUpRight className="h-5 w-5 text-destructive" />
-          <div>
-            <p className="text-lg font-bold text-foreground">{dashboardMetrics.escalated}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Escalated</p>
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 sm:p-4">
+          <ArrowUpRight className="h-5 w-5 shrink-0 text-destructive" />
+          <div className="min-w-0">
+            <p className="text-base sm:text-lg font-bold text-foreground">{dashboardMetrics.escalated}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">Escalated</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-          <Users className="h-5 w-5 text-info" />
-          <div>
-            <p className="text-lg font-bold text-foreground">{dashboardMetrics.activeAnalysts}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Active Analysts</p>
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 sm:p-4">
+          <Users className="h-5 w-5 shrink-0 text-info" />
+          <div className="min-w-0">
+            <p className="text-base sm:text-lg font-bold text-foreground">{dashboardMetrics.activeAnalysts}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">Active Analysts</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-          <Activity className="h-5 w-5 text-primary" />
-          <div>
-            <p className="text-lg font-bold text-foreground">{dashboardMetrics.ingestionRate.toLocaleString()}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Events/min</p>
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 sm:p-4">
+          <Activity className="h-5 w-5 shrink-0 text-primary" />
+          <div className="min-w-0">
+            <p className="text-base sm:text-lg font-bold text-foreground">{dashboardMetrics.ingestionRate.toLocaleString()}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">Events/min</p>
           </div>
         </div>
       </div>

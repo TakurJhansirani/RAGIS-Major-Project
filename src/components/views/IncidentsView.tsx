@@ -28,15 +28,15 @@ export const IncidentsView = () => {
   });
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-3 sm:space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">Incident Management</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-foreground">Incident Management</h1>
         <span className="text-xs font-mono text-muted-foreground">{filtered.length} incidents</span>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+        <div className="relative flex-1 sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
@@ -46,14 +46,14 @@ export const IncidentsView = () => {
             className="h-9 w-full rounded-lg border border-border bg-background pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors"
           />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <Filter className="h-4 w-4 text-muted-foreground mr-1" />
           {severityFilters.map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={cn(
-                'rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                'rounded-md px-3 py-2 sm:py-1.5 text-xs font-medium transition-all whitespace-nowrap',
                 filter === f.value
                   ? 'bg-primary/15 text-primary border border-primary/30'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent'

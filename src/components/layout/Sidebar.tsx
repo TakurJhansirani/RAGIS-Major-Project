@@ -39,7 +39,7 @@ export const Sidebar = ({ collapsed, activeView, onViewChange, onToggle }: Sideb
   return (
     <aside
       className={cn(
-        'relative flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
+        'relative flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
         collapsed ? 'w-16' : 'w-64'
       )}
     >
@@ -66,7 +66,7 @@ export const Sidebar = ({ collapsed, activeView, onViewChange, onToggle }: Sideb
               key={item.id}
               onClick={() => onViewChange(item.id)}
               className={cn(
-                'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                'flex w-full items-center gap-3 rounded-lg px-3 py-3 sm:py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98]',
                 isActive
                   ? 'bg-primary/10 text-primary glow-primary'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
@@ -90,7 +90,7 @@ export const Sidebar = ({ collapsed, activeView, onViewChange, onToggle }: Sideb
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 sm:py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:scale-[0.98]"
             >
               <Icon className="h-4 w-4 shrink-0" />
               {!collapsed && <span>{item.label}</span>}
@@ -102,7 +102,7 @@ export const Sidebar = ({ collapsed, activeView, onViewChange, onToggle }: Sideb
       {/* Toggle */}
       <button
         onClick={onToggle}
-        className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute -right-3 top-20 hidden lg:flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>

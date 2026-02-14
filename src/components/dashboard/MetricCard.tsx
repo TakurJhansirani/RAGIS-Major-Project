@@ -33,20 +33,20 @@ export const MetricCard = ({ title, value, subtitle, icon: Icon, trend, variant 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
       className={cn(
-        'rounded-xl border bg-card p-5 transition-all duration-300 hover:bg-card/80',
+        'rounded-xl border bg-card p-3 sm:p-5 transition-all duration-300 hover:bg-card/80',
         variantStyles[variant]
       )}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
+          <p className="text-xl sm:text-3xl font-bold tracking-tight text-foreground">{value}</p>
           {subtitle && (
             <p className="text-xs text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', iconVariantStyles[variant])}>
-          <Icon className="h-5 w-5" />
+        <div className={cn('flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg shrink-0', iconVariantStyles[variant])}>
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </div>
       </div>
       {trend && (
