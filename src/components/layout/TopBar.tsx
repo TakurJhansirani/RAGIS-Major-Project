@@ -1,7 +1,8 @@
-import { Menu, Shield, Activity, Search } from 'lucide-react';
+import { Menu, Shield, Activity, Search, WifiOff } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { NotificationPanel } from '@/components/NotificationPanel';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -9,8 +10,17 @@ interface TopBarProps {
 }
 
 export const TopBar = ({ onToggleSidebar, onNavigate }: TopBarProps) => {
+  const isOffline = useOfflineStatus();
+
   return (
-    <header className="flex h-14 sm:h-16 items-center justify-between border-b border-border bg-card/50 px-3 sm:px-6">
+    <>
+      {isOffline && (
+        <div className="flex items-center justify-center gap-2 bg-warning/20 border-b border-warning/30 px-3 py-1.5 text-xs font-medium text-warning">
+          <WifiOff className="h-3.5 w-3.5" />
+          <span>You're offline — viewing cached data</span>
+        </div>
+      )}
+      <header className="flex h-14 sm:h-16 items-center justify-between border-b border-border bg-card/50 px-3 sm:px-6">
       <div className="flex items-center gap-3 sm:gap-4">
         <button onClick={onToggleSidebar} className="text-muted-foreground hover:text-foreground lg:hidden p-1.5 -ml-1.5 rounded-lg active:bg-secondary">
           <Menu className="h-5 w-5" />
@@ -55,6 +65,7 @@ export const TopBar = ({ onToggleSidebar, onNavigate }: TopBarProps) => {
           </div>
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 };
