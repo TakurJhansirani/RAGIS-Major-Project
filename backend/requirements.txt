@@ -1,0 +1,7 @@
+Django
+Django REST Framework
+psycopg2
+sentence-transformers
+faiss-cpu
+celery
+redis
