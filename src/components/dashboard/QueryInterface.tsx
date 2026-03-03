@@ -1,38 +1,39 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Send, Sparkles, MessageSquare } from 'lucide-react';
+import { Brain, Send, Sparkles, MessageSquare, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
-  role: 'user' | 'ai';
+  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
 }
 
 const sampleQueries = [
   "What are the top threats this week?",
-  "Has IP 185.220.101.34 appeared before?",
-  "Summarize all critical incidents today",
+  "Summarize all critical incidents",
   "Show lateral movement patterns",
+  "Which IPs have appeared in multiple incidents?",
 ];
 
-const mockResponses: Record<string, string> = {
-  "What are the top threats this week?":
-    "This week's top threats are: **1) Lateral Movement** (3 incidents, targeting Domain Controllers), **2) Spear-Phishing** (5 campaigns detected, 2 targeting executives), **3) Data Exfiltration** (2 incidents with 4.1GB total outbound transfer). Critical finding: The lateral movement incidents correlate with credentials compromised in Monday's phishing campaign (INC-2024-0831).",
-  "Has IP 185.220.101.34 appeared before?":
-    "Yes. IP **185.220.101.34** has appeared in **3 prior incidents** over the past 30 days:\n- INC-2024-0846: Phishing campaign (today)\n- INC-2024-0798: Spam relay (Dec 8)\n- INC-2024-0756: Credential stuffing (Dec 1)\n\nThis IP is associated with a known Tor exit node and is listed in 4 threat intelligence feeds. **Recommendation:** Add to permanent block list.",
-  default:
-    "Based on my analysis of the current incident data and historical knowledge base, I've identified the relevant patterns. The RAG pipeline retrieved 12 similar historical incidents to provide context. Would you like me to generate a detailed report or drill down into specific indicators?",
-};
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-query`;
 
 export const QueryInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = (query?: string) => {
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = async (query?: string) => {
     const text = query || input.trim();
-    if (!text) return;
+    if (!text || isLoading) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -41,16 +42,104 @@ export const QueryInterface = () => {
       timestamp: new Date(),
     };
 
-    const aiResponse = mockResponses[text] || mockResponses.default;
-    const aiMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'ai',
-      content: aiResponse,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMsg, aiMsg]);
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
+    setIsLoading(true);
+
+    let assistantContent = '';
+
+    const apiMessages = [...messages, userMsg].map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: apiMessages, mode: 'query' }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: 'AI service error' }));
+        throw new Error(err.error || `Error ${resp.status}`);
+      }
+
+      if (!resp.body) throw new Error('No response stream');
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = '';
+
+      const upsertAssistant = (content: string) => {
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.role === 'assistant') {
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content } : m));
+          }
+          return [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content, timestamp: new Date() }];
+        });
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              assistantContent += delta;
+              upsertAssistant(assistantContent);
+            }
+          } catch {
+            textBuffer = line + '\n' + textBuffer;
+            break;
+          }
+        }
+      }
+
+      // Flush remaining
+      if (textBuffer.trim()) {
+        for (let raw of textBuffer.split('\n')) {
+          if (!raw) continue;
+          if (raw.endsWith('\r')) raw = raw.slice(0, -1);
+          if (!raw.startsWith('data: ')) continue;
+          const jsonStr = raw.slice(6).trim();
+          if (jsonStr === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              assistantContent += delta;
+              upsertAssistant(assistantContent);
+            }
+          } catch { /* ignore */ }
+        }
+      }
+    } catch (e: any) {
+      console.error('AI query error:', e);
+      toast.error(e.message || 'Failed to get AI response');
+      // Remove the user message if no assistant response was generated
+      if (!assistantContent) {
+        setMessages(prev => prev.filter(m => m.id !== userMsg.id));
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,9 +153,10 @@ export const QueryInterface = () => {
       <div className="flex items-center gap-2 border-b border-border p-4">
         <Brain className="h-4 w-4 text-primary" />
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Natural Language Query
+          RAG-Powered AI Query
         </h2>
         <Sparkles className="h-3 w-3 text-primary ml-1" />
+        <span className="ml-auto text-[10px] text-muted-foreground bg-primary/10 px-2 py-0.5 rounded-full">Live AI</span>
       </div>
 
       {/* Messages */}
@@ -74,7 +164,7 @@ export const QueryInterface = () => {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
             <MessageSquare className="h-8 w-8 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground mb-4">Ask RAGIS about your security incidents</p>
+            <p className="text-sm text-muted-foreground mb-4">Ask RAGIS about your security incidents — powered by real AI & live data</p>
             <div className="grid grid-cols-1 gap-2 w-full max-w-md">
               {sampleQueries.map((query) => (
                 <button
@@ -103,7 +193,7 @@ export const QueryInterface = () => {
                 )}
               >
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  {msg.role === 'ai' && <Brain className="h-3 w-3 text-primary" />}
+                  {msg.role === 'assistant' && <Brain className="h-3 w-3 text-primary" />}
                   <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                     {msg.role === 'user' ? 'You' : 'RAGIS AI'}
                   </span>
@@ -111,11 +201,28 @@ export const QueryInterface = () => {
                     {msg.timestamp.toLocaleTimeString()}
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line">{msg.content}</p>
+                {msg.role === 'assistant' ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-sm leading-relaxed text-foreground/90">{msg.content}</p>
+                )}
               </motion.div>
             ))}
+            {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center gap-2 text-muted-foreground p-3"
+              >
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span className="text-xs">RAGIS is analyzing...</span>
+              </motion.div>
+            )}
           </AnimatePresence>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -127,14 +234,15 @@ export const QueryInterface = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask about incidents, threats, IPs..."
-            className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors"
+            disabled={isLoading}
+            className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors disabled:opacity-50"
           />
           <button
             onClick={() => handleSend()}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
             className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-all"
           >
-            <Send className="h-4 w-4" />
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </button>
         </div>
       </div>
