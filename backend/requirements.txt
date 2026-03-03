@@ -1,7 +1,8 @@
+# Python Dependencies for Django REST, PostgreSQL, Hugging Face, FAISS, and Celery
+
 Django
-Django REST Framework
-psycopg2
-sentence-transformers
+Django REST framework
+psycopg2-binary
+transformers
 faiss-cpu
 celery
-redis
