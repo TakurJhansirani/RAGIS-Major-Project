@@ -13,11 +13,13 @@ const Auth = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   if (loading) {
     return (
@@ -30,6 +32,22 @@ const Auth = () => {
   if (user) {
     return <Navigate to="/" replace />;
   }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +81,61 @@ const Auth = () => {
   };
 
   if (signupSuccess) {
+  if (resetSent) {
     return (
+      <div className="flex min-h-screen items-center justify-center bg-background bg-grid-pattern p-4">
+        <Card className="w-full max-w-md border-border">
+          <CardHeader className="items-center text-center">
+            <CheckCircle className="mb-2 h-12 w-12 text-success" />
+            <CardTitle className="text-xl text-foreground">Check your email</CardTitle>
+            <CardDescription>
+              We've sent a password reset link to <strong className="text-foreground">{email}</strong>.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" className="w-full" onClick={() => { setResetSent(false); setIsForgotPassword(false); }}>
+              Back to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isForgotPassword) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background bg-grid-pattern p-4">
+        <Card className="w-full max-w-md border-border">
+          <CardHeader className="items-center text-center">
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+              <Shield className="h-7 w-7 text-primary" />
+            </div>
+            <CardTitle className="text-2xl text-foreground">Forgot Password</CardTitle>
+            <CardDescription>Enter your email and we'll send you a reset link</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail">Email</Label>
+                <Input id="resetEmail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="analyst@company.com" required />
+              </div>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Send Reset Link
+              </Button>
+            </form>
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              <button type="button" onClick={() => setIsForgotPassword(false)} className="font-medium text-primary hover:underline">
+                Back to Login
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
       <div className="flex min-h-screen items-center justify-center bg-background bg-grid-pattern p-4">
         <Card className="w-full max-w-md border-border">
           <CardHeader className="items-center text-center">
@@ -132,6 +204,13 @@ const Auth = () => {
                 minLength={6}
               />
             </div>
+            {isLogin && (
+              <div className="mt-2 text-right">
+                <button type="button" onClick={() => setIsForgotPassword(true)} className="text-xs text-muted-foreground hover:text-primary hover:underline">
+                  Forgot password?
+                </button>
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLogin ? 'Sign In' : 'Create Account'}
