@@ -1,6 +1,6 @@
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { ShieldAlert } from 'lucide-react';
-import type { SeverityBreakdown } from '@/data/reportData';
+import type { SeverityBreakdown } from '@/types/report';
 
 const SEVERITY_COLORS: Record<string, string> = {
   Critical: 'hsl(var(--severity-critical))',

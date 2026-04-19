@@ -1,73 +1,176 @@
-# Welcome to your Lovable project
+# RAGIS
 
-## Project info
+RAGIS is an AI-assisted security operations platform for incident triage, investigation, reporting, and knowledge-driven analysis.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+It combines a React frontend for SOC workflows with a Django REST backend for incident ingestion, SIEM sync, threat intelligence, SOAR operations, and analytics.
 
-## How can I edit this code?
+## Highlights
 
-There are several ways of editing your application.
+- Incident dashboard with live metrics, trend charts, and detailed incident views
+- Incident management with filtering, search, status updates, and false-positive marking
+- AI query interface for natural-language investigation workflows
+- Timeline and root-cause analysis with attack-chain reconstruction and MITRE mapping
+- Knowledge base with resolved incidents, analyst notes, and AI learning history
+- Automated report generation with export support
+- Notification center with per-category filters and bulk actions
+- SIEM integrations for Splunk, Elasticsearch, and generic webhooks
+- Threat intel sync and SOAR playbook execution tracking
+- Multi-organization support and settings management
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Frontend
 
-Changes made via Lovable will be committed automatically to this repo.
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS + shadcn/ui
+- TanStack Query
+- Supabase authentication
 
-**Use your preferred IDE**
+### Backend
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Django + Django REST Framework
+- Celery + Redis
+- SQLite (local) or PostgreSQL (configurable)
+- SIEM and webhook integration modules
+- Optional ML components (Transformers, Sentence-Transformers, FAISS)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Repository Structure
 
-Follow these steps:
+```text
+RAGIS/
+	src/                    # Frontend application
+	backend/                # Django backend
+		incidents/            # Incident domain, APIs, integrations
+		ragis/                # Django settings and URL config
+	supabase/               # Supabase edge functions and config
+	database/               # SQL schema assets
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Prerequisites
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Node.js 18+
+- npm 9+
+- Python 3.10+
+- pip
 
-# Step 3: Install the necessary dependencies.
-npm i
+Optional for async workers/integration scale:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+- Redis
+- PostgreSQL
+
+## Quick Start
+
+### 1. Clone and install frontend dependencies
+
+```bash
+git clone https://github.com/TakurJhansirani/RAGIS-Major-Project.git
+cd RAGIS-Major-Project
+npm install
+```
+
+### 2. Configure frontend environment
+
+Create .env.local in the project root:
+
+```env
+VITE_API_URL=http://localhost:8000/api/v1
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+```
+
+### 3. Setup backend
+
+```bash
+cd backend
+python -m venv .venv
+
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+copy .env.example .env
+python manage.py migrate
+python manage.py runserver
+```
+
+Backend runs at:
+
+- http://localhost:8000
+- API base: http://localhost:8000/api/v1
+
+### 4. Start frontend
+
+In a second terminal at repository root:
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Frontend runs at:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- http://localhost:8080
 
-**Use GitHub Codespaces**
+## API Overview
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Main routes are exposed under /api/v1/.
 
-## What technologies are used for this project?
+### Core resources
 
-This project is built with:
+- /incidents/
+- /alerts/
+- /entities/
+- /knowledge-base/
+- /organizations/
+- /threat-intel/
+- /soar-executions/
+- /notifications/
+- /analyst-notes/
+- /ai-learning-history/
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Utility and integration endpoints
 
-## How can I deploy this project?
+- /settings/ai-models/
+- /settings/siem/
+- /settings/siem/restore/
+- /webhooks/incident/
+- /sync/splunk/
+- /sync/elasticsearch/
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Testing
 
-## Can I connect a custom domain to my Lovable project?
+### Frontend
 
-Yes, you can!
+```bash
+npm test
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Backend
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+cd backend
+pytest
+```
+
+## Security and GitHub Push Checklist
+
+Before pushing, ensure sensitive files are not committed:
+
+- .env
+- backend/.env
+- any credentials, API keys, or private tokens
+- local database artifacts if not intended for source control
+
+Recommended: keep and share only template files such as backend/.env.example.
+
+## Additional Documentation
+
+- REAL_INCIDENT_INTEGRATION.md
+- INCIDENT_INTEGRATION_QUICKSTART.md
+- INTEGRATION_SUMMARY.md
+- SIEM_SYNC_GUIDE.md
+- REACT_COMPONENT_EXAMPLES.md
+
+## License
+
+Add your preferred license (MIT, Apache-2.0, etc.) before public release.

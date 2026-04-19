@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { analystNotes } from '@/data/knowledgeBaseData';
 import { Brain, User, MessageSquare, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useAnalystNotes } from '@/hooks/useIncidents';
+import type { AnalystNote } from '@/types/knowledge';
 
 const noteTypeStyles: Record<string, { label: string; className: string }> = {
   observation: { label: 'Observation', className: 'bg-info/10 text-info border-info/20' },
@@ -14,6 +15,18 @@ const noteTypeStyles: Record<string, { label: string; className: string }> = {
 export const AnalystNotesPanel = () => {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const { data: noteItems = [] } = useAnalystNotes();
+
+  const analystNotes: AnalystNote[] = (noteItems as any[]).map((item) => ({
+    id: `note-${item.note_id}`,
+    incidentId: `INC-${item.incident}`,
+    author: item.author || 'Analyst',
+    role: item.role || 'SOC Analyst',
+    content: item.content || 'No note content available.',
+    timestamp: item.created_at || item.updated_at || new Date().toISOString(),
+    type: item.note_type || 'observation',
+    aiRelevant: Boolean(item.ai_relevant),
+  }));
 
   const filtered = analystNotes
     .filter((n) => {

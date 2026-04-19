@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { timelineEvents } from '@/data/mockData';
 import { SeverityBadge } from './SeverityBadge';
 import { cn } from '@/lib/utils';
-import type { Severity } from '@/data/mockData';
+import type { TimelinePoint } from '@/lib/incidentAnalytics';
+
+type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 
 const dotColors: Record<Severity, string> = {
   critical: 'bg-severity-critical',
@@ -12,7 +13,11 @@ const dotColors: Record<Severity, string> = {
   info: 'bg-severity-info',
 };
 
-export const AttackTimeline = () => {
+interface AttackTimelineProps {
+  events: TimelinePoint[];
+}
+
+export const AttackTimeline = ({ events }: AttackTimelineProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -27,7 +32,7 @@ export const AttackTimeline = () => {
         {/* Vertical line */}
         <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border" />
 
-        {timelineEvents.map((event, index) => (
+        {events.map((event, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, x: -8 }}

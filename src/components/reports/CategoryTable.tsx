@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { CategoryBreakdown } from '@/data/reportData';
+import type { CategoryBreakdown } from '@/types/report';
 
 interface Props {
   data: CategoryBreakdown[];

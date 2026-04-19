@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { KPIMetric } from '@/data/reportData';
+import type { KPIMetric } from '@/types/report';
 
 interface ReportKPIGridProps {
   metrics: KPIMetric[];

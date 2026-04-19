@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from '@/components/ui/command';
 import { Shield, Globe, Server, Clock, Search, Brain, FileText, LayoutDashboard, GitBranch, Settings, Database } from 'lucide-react';
-import { incidents } from '@/data/mockData';
 import { SeverityBadge } from '@/components/dashboard/SeverityBadge';
+import { useIncidents } from '@/hooks/useIncidents';
 
 interface GlobalSearchProps {
   onNavigate: (view: string) => void;
@@ -19,14 +19,18 @@ const pages = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
-// Extract unique IPs and assets from incidents
-const allIPs = Array.from(
-  new Set(incidents.flatMap((i) => [i.sourceIP, i.targetIP].filter((ip) => ip !== 'N/A')))
-);
-const allAssets = Array.from(new Set(incidents.flatMap((i) => i.affectedAssets)));
-
 export const GlobalSearch = ({ onNavigate }: GlobalSearchProps) => {
   const [open, setOpen] = useState(false);
+  const { data: incidents = [] } = useIncidents();
+
+  const allIPs = useMemo(() => Array.from(
+    new Set(
+      incidents.flatMap((i: any) => [i.source_ip ?? i.sourceIP, i.target_ip ?? i.targetIP].filter(Boolean))
+    )
+  ), [incidents]);
+  const allAssets = useMemo(() => Array.from(
+    new Set(incidents.flatMap((i: any) => i.affected_assets ?? i.affectedAssets ?? []))
+  ), [incidents]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -77,16 +81,21 @@ export const GlobalSearch = ({ onNavigate }: GlobalSearchProps) => {
           <CommandSeparator />
 
           <CommandGroup heading="Incidents">
-            {incidents.map((inc) => (
-              <CommandItem key={inc.id} value={`${inc.id} ${inc.title} ${inc.sourceIP} ${inc.targetIP}`} onSelect={() => go('incidents')} className="gap-2">
+            {incidents.map((inc: any) => {
+              const id = inc.incident_id ?? inc.id;
+              const sourceIp = inc.source_ip ?? inc.sourceIP ?? '';
+              const targetIp = inc.target_ip ?? inc.targetIP ?? '';
+              return (
+              <CommandItem key={id} value={`${id} ${inc.title} ${sourceIp} ${targetIp}`} onSelect={() => go('incidents')} className="gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <div className="flex flex-1 items-center gap-2 min-w-0">
-                  <span className="font-mono text-xs text-muted-foreground">{inc.id}</span>
+                  <span className="font-mono text-xs text-muted-foreground">{id}</span>
                   <span className="truncate text-sm">{inc.title}</span>
                 </div>
                 <SeverityBadge severity={inc.severity} />
               </CommandItem>
-            ))}
+            );
+            })}
           </CommandGroup>
 
           <CommandSeparator />

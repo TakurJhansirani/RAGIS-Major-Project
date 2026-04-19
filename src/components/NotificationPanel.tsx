@@ -5,8 +5,27 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { mockNotifications, type Notification, type NotificationCategory } from '@/data/notificationData';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  useNotifications,
+  useMarkNotificationRead,
+  useDismissNotification,
+  useMarkAllNotificationsRead,
+  useDismissAllNotifications,
+} from '@/hooks/useIncidents';
+
+type NotificationCategory = 'critical' | 'escalation' | 'system' | 'ai-insight';
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  category: NotificationCategory;
+  timestamp: Date;
+  read: boolean;
+  dismissed: boolean;
+  incidentId?: string;
+}
 
 const categoryConfig: Record<NotificationCategory, { icon: typeof AlertTriangle; label: string; className: string }> = {
   critical: { icon: AlertTriangle, label: 'Critical', className: 'text-destructive bg-destructive/10' },
@@ -18,9 +37,26 @@ const categoryConfig: Record<NotificationCategory, { icon: typeof AlertTriangle;
 const categories: (NotificationCategory | 'all')[] = ['all', 'critical', 'escalation', 'ai-insight', 'system'];
 
 export const NotificationPanel = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { data: notificationItems = [] } = useNotifications();
+  const markReadMutation = useMarkNotificationRead();
+  const dismissMutation = useDismissNotification();
+  const markAllReadMutation = useMarkAllNotificationsRead();
+  const dismissAllMutation = useDismissAllNotifications();
   const [activeFilter, setActiveFilter] = useState<NotificationCategory | 'all'>('all');
   const [open, setOpen] = useState(false);
+
+  const notifications = useMemo<Notification[]>(() => {
+    return (notificationItems as any[]).map((item) => ({
+      id: String(item.notification_id),
+      title: item.title,
+      message: item.message,
+      category: item.category,
+      timestamp: new Date(item.created_at),
+      read: Boolean(item.read),
+      dismissed: Boolean(item.dismissed),
+      incidentId: item.incident ? `INC-${item.incident}` : undefined,
+    }));
+  }, [notificationItems]);
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read && !n.dismissed).length, [notifications]);
 
@@ -31,19 +67,19 @@ export const NotificationPanel = () => {
   }, [notifications, activeFilter]);
 
   const markRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    markReadMutation.mutate(Number(id));
   };
 
   const dismiss = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, dismissed: true } : n));
+    dismissMutation.mutate(Number(id));
   };
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    markAllReadMutation.mutate();
   };
 
   const dismissAll = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, dismissed: true })));
+    dismissAllMutation.mutate();
   };
 
   return (

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Clock, ChevronDown, ChevronUp, Brain, Tag, User, Timer } from 'lucide-react';
-import { resolvedIncidents } from '@/data/knowledgeBaseData';
 import { SeverityBadge } from '@/components/dashboard/SeverityBadge';
-import type { ResolvedIncident } from '@/data/knowledgeBaseData';
+import type { ResolvedIncident } from '@/types/knowledge';
 import { cn } from '@/lib/utils';
+import { useIncidents } from '@/hooks/useIncidents';
 
 interface ResolvedIncidentsTableProps {
   onSelectIncident: (incident: ResolvedIncident) => void;
@@ -15,8 +15,38 @@ export const ResolvedIncidentsTable = ({ onSelectIncident, selectedId }: Resolve
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<'resolvedAt' | 'severity' | 'aiAccuracy'>('resolvedAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const { data: resolvedApiIncidents = [] } = useIncidents({ status: 'resolved' });
 
   const severityOrder = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+
+  const resolvedIncidents: ResolvedIncident[] = (resolvedApiIncidents as any[]).map((inc) => {
+    const incidentId = String(inc.incident_id ?? inc.id ?? 'unknown');
+    const createdAt = inc.created_at ?? new Date().toISOString();
+    const updatedAt = inc.updated_at ?? createdAt;
+    const confidence = Number(inc.confidence_score ?? 0);
+    const aiAccuracy = Number.isFinite(confidence) && confidence > 0 ? confidence : 75;
+    const risk = Number(inc.risk_score ?? 0);
+    const ttr = Number.isFinite(risk) && risk > 0 ? Math.min(720, Math.max(5, risk * 4)) : 60;
+    const detectedAt = createdAt;
+    const resolvedAt = updatedAt;
+
+    return {
+      id: `INC-${incidentId}`,
+      title: inc.title ?? 'Untitled Incident',
+      severity: inc.severity ?? 'medium',
+      category: inc.category ?? 'uncategorized',
+      resolvedAt,
+      detectedAt,
+      resolvedBy: 'SOC Analyst',
+      rootCause: inc.description || 'Root cause not captured in incident payload.',
+      resolution: inc.ai_summary || 'Resolution details not available.',
+      aiAccuracy,
+      lessonsLearned: 'Capture analyst notes and post-incident review to enrich this knowledge entry.',
+      tags: Array.isArray(inc.affected_assets) ? inc.affected_assets : [],
+      ttd: 10,
+      ttr,
+    };
+  });
 
   const filtered = resolvedIncidents
     .filter((inc) => {

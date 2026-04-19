@@ -5,7 +5,7 @@ import { ResolvedIncidentsTable } from '@/components/knowledge/ResolvedIncidents
 import { IncidentKnowledgeDetail } from '@/components/knowledge/IncidentKnowledgeDetail';
 import { AILearningTimeline } from '@/components/knowledge/AILearningTimeline';
 import { AnalystNotesPanel } from '@/components/knowledge/AnalystNotesPanel';
-import type { ResolvedIncident } from '@/data/knowledgeBaseData';
+import type { ResolvedIncident } from '@/types/knowledge';
 import { cn } from '@/lib/utils';
 
 type TabId = 'resolved' | 'notes' | 'learning';

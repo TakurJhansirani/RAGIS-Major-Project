@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import type { Severity } from '@/data/mockData';
+import type { Severity } from '@/types/incident';
 
 interface SeverityBadgeProps {
   severity: Severity;

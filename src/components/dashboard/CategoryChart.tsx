@@ -1,8 +1,12 @@
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { categoryDistribution } from '@/data/mockData';
+import type { CategoryPoint } from '@/lib/incidentAnalytics';
 
-export const CategoryChart = () => {
+interface CategoryChartProps {
+  data: CategoryPoint[];
+}
+
+export const CategoryChart = ({ data }: CategoryChartProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -18,7 +22,7 @@ export const CategoryChart = () => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={categoryDistribution}
+                data={data}
                 cx="50%"
                 cy="50%"
                 innerRadius={50}
@@ -28,7 +32,7 @@ export const CategoryChart = () => {
                 stroke="hsl(var(--background))"
                 strokeWidth={2}
               >
-                {categoryDistribution.map((entry, index) => (
+                {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
@@ -45,7 +49,7 @@ export const CategoryChart = () => {
           </ResponsiveContainer>
         </div>
         <div className="space-y-2 flex-1">
-          {categoryDistribution.map((item) => (
+          {data.map((item) => (
             <div key={item.name} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <div className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: item.fill }} />

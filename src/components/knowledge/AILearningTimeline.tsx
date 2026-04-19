@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { Brain, Zap, Filter, TrendingUp, ArrowRight, Settings2, Search, Sparkles } from 'lucide-react';
-import { aiLearningHistory } from '@/data/knowledgeBaseData';
-import type { AILearningEntry } from '@/data/knowledgeBaseData';
+import type { AILearningEntry } from '@/types/knowledge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useAILearningHistory } from '@/hooks/useIncidents';
 
 const typeConfig: Record<AILearningEntry['type'], { label: string; icon: typeof Brain; className: string }> = {
   'model-update': { label: 'Model Update', icon: Brain, className: 'bg-primary/10 text-primary border-primary/20' },
@@ -21,6 +21,34 @@ const impactStyles = {
 
 export const AILearningTimeline = () => {
   const [filter, setFilter] = useState<AILearningEntry['type'] | 'all'>('all');
+  const { data: historyItems = [] } = useAILearningHistory();
+
+  const aiLearningHistory: AILearningEntry[] = (historyItems as any[]).map((item) => {
+    const metricsChange = item.metrics_change && item.metrics_change.metric
+      ? {
+          metric: String(item.metrics_change.metric),
+          before: Number(item.metrics_change.before ?? 0),
+          after: Number(item.metrics_change.after ?? 0),
+        }
+      : undefined;
+
+    const relatedIncidentIds: number[] = Array.isArray(item.related_incident_ids)
+      ? item.related_incident_ids
+      : Array.isArray(item.related_incidents)
+        ? item.related_incidents
+        : [];
+
+    return {
+      id: `learn-${item.learning_id}`,
+      timestamp: item.created_at || item.updated_at || new Date().toISOString(),
+      type: item.entry_type || 'pattern-learned',
+      title: item.title || 'Knowledge update',
+      description: item.description || 'No additional details available.',
+      impact: item.impact || 'neutral',
+      relatedIncidents: relatedIncidentIds.map((id: number) => `INC-${id}`),
+      metricsChange,
+    };
+  });
 
   const filtered = filter === 'all'
     ? aiLearningHistory

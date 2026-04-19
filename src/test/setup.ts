@@ -1,3 +1,10 @@
+
+// ResizeObserver polyfill for testing
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as any;
 import "@testing-library/jest-dom";
 
 Object.defineProperty(window, "matchMedia", {

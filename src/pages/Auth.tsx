@@ -9,6 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Shield, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  return 'Unexpected error';
+};
+
 const Auth = () => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
@@ -42,8 +47,8 @@ const Auth = () => {
       });
       if (error) throw error;
       setResetSent(true);
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      toast({ title: 'Error', description: getErrorMessage(error), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -69,10 +74,10 @@ const Auth = () => {
         if (error) throw error;
         setSignupSuccess(true);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Authentication Error',
-        description: error.message,
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     } finally {

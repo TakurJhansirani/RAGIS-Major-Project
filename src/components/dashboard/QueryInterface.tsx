@@ -12,6 +12,11 @@ interface Message {
   timestamp: Date;
 }
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  return 'Failed to get AI response';
+};
+
 const sampleQueries = [
   "What are the top threats this week?",
   "Summarize all critical incidents",
@@ -130,9 +135,9 @@ export const QueryInterface = () => {
           } catch { /* ignore */ }
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('AI query error:', e);
-      toast.error(e.message || 'Failed to get AI response');
+      toast.error(getErrorMessage(e));
       // Remove the user message if no assistant response was generated
       if (!assistantContent) {
         setMessages(prev => prev.filter(m => m.id !== userMsg.id));

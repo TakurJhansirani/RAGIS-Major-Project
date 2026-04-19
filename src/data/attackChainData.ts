@@ -1,4 +1,4 @@
-import type { Severity } from './mockData';
+import type { Severity } from '@/types/incident';
 export type { Severity };
 
 export interface AttackChainStep {

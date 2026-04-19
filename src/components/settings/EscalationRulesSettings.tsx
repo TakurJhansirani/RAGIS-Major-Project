@@ -4,7 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { SeverityBadge } from '@/components/dashboard/SeverityBadge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { Severity } from '@/data/mockData';
+import type { Severity } from '@/types/incident';
 
 interface EscalationRule {
   id: string;

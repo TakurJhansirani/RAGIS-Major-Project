@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { NotificationPanel } from '@/components/NotificationPanel';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
+import { useFallbackMode } from '@/hooks/useFallbackMode';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -12,6 +13,7 @@ interface TopBarProps {
 
 export const TopBar = ({ onToggleSidebar, onNavigate }: TopBarProps) => {
   const isOffline = useOfflineStatus();
+  const isFallbackMode = useFallbackMode();
   const { user, signOut } = useAuth();
 
   return (
@@ -20,6 +22,12 @@ export const TopBar = ({ onToggleSidebar, onNavigate }: TopBarProps) => {
         <div className="flex items-center justify-center gap-2 bg-warning/20 border-b border-warning/30 px-3 py-1.5 text-xs font-medium text-warning">
           <WifiOff className="h-3.5 w-3.5" />
           <span>You're offline — viewing cached data</span>
+        </div>
+      )}
+      {!isOffline && isFallbackMode && (
+        <div className="flex items-center justify-center gap-2 bg-info/20 border-b border-info/30 px-3 py-1.5 text-xs font-medium text-info">
+          <WifiOff className="h-3.5 w-3.5" />
+          <span>Backend unavailable — using fallback data</span>
         </div>
       )}
       <header className="flex h-14 sm:h-16 items-center justify-between border-b border-border bg-card/50 px-3 sm:px-6">

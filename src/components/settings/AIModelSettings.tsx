@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Brain, Zap, CheckCircle } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { setBackendFallbackActive } from '@/hooks/useFallbackMode';
 
 interface AIModel {
   id: string;
@@ -14,6 +15,14 @@ interface AIModel {
   active: boolean;
 }
 
+interface AIModelSettingsResponse {
+  confidence_threshold?: number;
+  auto_triage?: boolean;
+  models?: AIModel[];
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
 const initialModels: AIModel[] = [
   { id: 'ragis-core', name: 'RAGIS Core v3.2', description: 'Primary threat classification and triage model', accuracy: 94.2, latency: '120ms', active: true },
   { id: 'anomaly-det', name: 'Anomaly Detector v2.1', description: 'Behavioral anomaly detection using UEBA signals', accuracy: 89.7, latency: '85ms', active: true },
@@ -23,9 +32,57 @@ const initialModels: AIModel[] = [
 ];
 
 export const AIModelSettings = () => {
-  const [models, setModels] = useState(initialModels);
+  const [models, setModels] = useState<AIModel[]>(initialModels);
   const [confidenceThreshold, setConfidenceThreshold] = useState([75]);
   const [autoTriage, setAutoTriage] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadModelSettings = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/settings/ai-models/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch AI model settings: ${response.status}`);
+        }
+
+        const payload = (await response.json()) as AIModelSettingsResponse;
+        if (!isMounted) return;
+
+        if (Array.isArray(payload.models) && payload.models.length > 0) {
+          setModels(payload.models);
+        }
+
+        if (typeof payload.confidence_threshold === 'number') {
+          setConfidenceThreshold([payload.confidence_threshold]);
+        }
+
+        if (typeof payload.auto_triage === 'boolean') {
+          setAutoTriage(payload.auto_triage);
+        }
+
+        setBackendFallbackActive('ai-model-settings', false);
+      } catch {
+        if (!isMounted) return;
+        setModels(initialModels);
+        setConfidenceThreshold([75]);
+        setAutoTriage(true);
+        setBackendFallbackActive('ai-model-settings', true);
+      }
+    };
+
+    loadModelSettings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const toggleModel = (id: string) => {
     setModels(prev => prev.map(m => {

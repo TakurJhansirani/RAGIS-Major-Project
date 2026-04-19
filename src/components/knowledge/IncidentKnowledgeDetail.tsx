@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Target, User, Clock, Tag, Lightbulb, Timer, TrendingUp, X, BookOpen } from 'lucide-react';
 import { SeverityBadge } from '@/components/dashboard/SeverityBadge';
-import { analystNotes } from '@/data/knowledgeBaseData';
-import type { ResolvedIncident } from '@/data/knowledgeBaseData';
+import type { ResolvedIncident } from '@/types/knowledge';
 import { cn } from '@/lib/utils';
+import { useAnalystNotes } from '@/hooks/useIncidents';
 
 interface IncidentKnowledgeDetailProps {
   incident: ResolvedIncident | null;
@@ -18,6 +18,9 @@ const noteTypeStyles: Record<string, { label: string; className: string }> = {
 };
 
 export const IncidentKnowledgeDetail = ({ incident, onClose }: IncidentKnowledgeDetailProps) => {
+  const incidentNumericId = incident ? incident.id.replace('INC-', '') : undefined;
+  const { data: analystNoteItems = [] } = useAnalystNotes(incidentNumericId);
+
   if (!incident) {
     return (
       <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-8">
@@ -29,7 +32,15 @@ export const IncidentKnowledgeDetail = ({ incident, onClose }: IncidentKnowledge
     );
   }
 
-  const relatedNotes = analystNotes.filter((n) => n.incidentId === incident.id);
+  const relatedNotes = (analystNoteItems as any[]).map((item) => ({
+    id: `detail-note-${item.note_id}`,
+    type: item.note_type || 'observation',
+    author: item.author || 'Analyst',
+    role: item.role || 'SOC Analyst',
+    aiRelevant: Boolean(item.ai_relevant),
+    content: item.content || 'No details available.',
+    timestamp: item.created_at || item.updated_at || new Date().toISOString(),
+  }));
 
   return (
     <AnimatePresence mode="wait">

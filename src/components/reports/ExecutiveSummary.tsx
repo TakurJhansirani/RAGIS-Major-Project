@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { FileText, AlertTriangle, Download } from 'lucide-react';
-import type { ReportSummary } from '@/data/reportData';
+import type { ReportSummary } from '@/types/report';
 
 interface Props {
   summary: ReportSummary;

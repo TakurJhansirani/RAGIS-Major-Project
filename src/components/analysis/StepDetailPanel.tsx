@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Clock, Shield, ExternalLink, X } from 'lucide-react';
 import { SeverityBadge } from '@/components/dashboard/SeverityBadge';
-import type { AttackChainStep } from '@/data/attackChainData';
+import type { AttackChainStep } from '@/types/attackChain';
 
 interface StepDetailPanelProps {
   step: AttackChainStep | null;

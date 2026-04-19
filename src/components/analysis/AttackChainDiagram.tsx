@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { ChevronRight, Shield, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { AttackChainStep, Severity } from '@/data/attackChainData';
+import type { AttackChainStep } from '@/types/attackChain';
+import type { Severity } from '@/types/incident';
 
 const severityColor: Record<Severity, string> = {
   critical: 'border-destructive bg-destructive/10 text-destructive',

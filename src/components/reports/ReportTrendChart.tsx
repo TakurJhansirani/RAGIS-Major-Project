@@ -1,6 +1,6 @@
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { BarChart3 } from 'lucide-react';
-import type { WeeklyTrendPoint } from '@/data/reportData';
+import type { WeeklyTrendPoint } from '@/types/report';
 
 interface ReportTrendChartProps {
   data: WeeklyTrendPoint[];
